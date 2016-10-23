@@ -31,7 +31,16 @@ class EAPAuth:
     def __init__(self, login_info):
         # bind the h3c client to the EAP protocal 
         self.client = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.htons(ETHERTYPE_PAE))
-        self.client.bind((login_info['ethernet_interface'], ETHERTYPE_PAE))
+        try:
+            self.client.bind((login_info['ethernet_interface'], ETHERTYPE_PAE))
+        except Exception,e:
+            print "Error Info:"
+            print e
+            print "Maybe you have entered a wrong ethernet device name."
+            print "Sometimes the ethernet device name is not eth0, but eno1, enp0s25 or something else."
+            print "Please use \"ifconfig\" to confirm your ethernet device name."
+            print "After that, use \"sudo vim /etc/yah3c.conf\" to modify your ethernet_interface.\n"
+            exit(-1)
         # get local ethernet card address
         self.mac_addr = self.client.getsockname()[4]
         self.ethernet_header = get_ethernet_header(self.mac_addr, PAE_GROUP_ADDR, ETHERTYPE_PAE)
